@@ -1,0 +1,507 @@
+datasource db {
+    provider = "mysql"
+    url      = env("mcEnv")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model user {
+    id              Int               @id @default(autoincrement())
+    openId          String            @unique()
+    nickname        String
+    name            String
+    gender          Int
+    city            String
+    province        String
+    area            String
+    country         String
+    avatarUrl       String
+    birthday        Int
+    phoneNumber     String            @unique()
+    level           Int
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    userCar         userCar[]
+    order           order[]
+    recommend       recommend[]
+    point           point?
+    pointRecord     pointRecord[]
+    userCoupon      userCoupon[]
+    userProductPack userProductPack[]
+}
+
+model admin {
+    id        Int    @id @default(autoincrement())
+    username  String @unique()
+    password  String
+    nickname  String
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+}
+
+model store {
+    id              Int               @id @default(autoincrement())
+    name            String
+    contact         String
+    phoneNumber     String
+    region          String
+    fullAddress     String
+    lat             String
+    lon             String
+    images          Json
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    construction    construction[]
+    employee        employee[]
+    userCoupon      userCoupon[]
+    userProductPack userProductPack[]
+    orderSku        orderSku[]
+}
+
+model couponTemplate {
+    id           Int          @id @default(autoincrement())
+    name         String
+    amount       Int
+    deadline     Int?
+    deadlineDay  Int?
+    memo         String
+    image        String
+    productId    Int
+    productSkuId Int
+    createdAt    Int?
+    updatedAt    Int?
+    status       Int?
+    productSku   productSku   @relation(fields: [productSkuId], references: [id])
+    product      product      @relation(fields: [productId], references: [id])
+    userCoupon   userCoupon[]
+}
+
+model recommend {
+    id            Int   @id @default(autoincrement())
+    createdAt     Int?
+    updatedAt     Int?
+    status        Int?
+    userId        Int
+    recommenderId Int
+    usedCoupon    Int
+    user          user? @relation(fields: [userId], references: [id])
+}
+
+model productType {
+    id              Int               @id @default(autoincrement())
+    name            String
+    picture         String
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    productModel    productModel[]
+    productPosition productPosition[]
+}
+
+model productModel {
+    id            Int          @id @default(autoincrement())
+    name          String
+    tag           String
+    sort          Int
+    productTypeId Int
+    createdAt     Int?
+    updatedAt     Int?
+    status        Int?
+    product       product[]
+    productType   productType? @relation(fields: [productTypeId], references: [id])
+}
+
+model product {
+    id                Int                 @id @default(autoincrement())
+    name              String
+    type              Int
+    productModelId    Int
+    payType           Int
+    banners           Json
+    saleStatus        Int
+    description       String
+    homePicture       String?
+    createdAt         Int?
+    updatedAt         Int?
+    status            Int?
+    applyStore        Json
+    productModel      productModel?       @relation(fields: [productModelId], references: [id])
+    couponTemplate    couponTemplate[]
+    roll              roll[]
+    productSku        productSku[]
+    userCoupon        userCoupon[]
+    constructionImage constructionImage[]
+}
+
+model productPosition {
+    id            Int          @id @default(autoincrement())
+    productTypeId Int
+    name          String
+    createdAt     Int?
+    updatedAt     Int?
+    status        Int?
+    productType   productType? @relation(fields: [productTypeId], references: [id])
+}
+
+model car {
+    id                Int                 @id @default(autoincrement())
+    name              String
+    carBrandId        Int
+    type              Int
+    sort              Int                 @default(0)
+    createdAt         Int?
+    updatedAt         Int?
+    status            Int?
+    carBrand          carBrand            @relation(fields: [carBrandId], references: [id])
+    userCar           userCar[]
+    constructionImage constructionImage[]
+}
+
+model carBrand {
+    id        Int    @id @default(autoincrement())
+    name      String
+    initial   String
+    image     String
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+    car       car[]
+}
+
+model userCar {
+    id           Int            @id @default(autoincrement())
+    createdAt    Int?
+    updatedAt    Int?
+    status       Int?
+    carId        Int
+    color        String
+    carNumber    String
+    VIN          String
+    userId       Int
+    user         user           @relation(fields: [userId], references: [id])
+    car          car            @relation(fields: [carId], references: [id])
+    construction construction[]
+}
+
+model construction {
+    id                Int                 @id @default(autoincrement())
+    createdAt         Int?
+    updatedAt         Int?
+    status            Int?
+    userCarId         Int
+    kilometer         Int
+    defectPart        String
+    defectImages      Json
+    defectType        String
+    expectComplete    Int
+    storeId           Int
+    memo              String
+    completeAt        Int
+    orderNumber       String
+    checkSign         String
+    checkSignAgain    String
+    code              String
+    store             store               @relation(fields: [storeId], references: [id])
+    userCar           userCar             @relation(fields: [userCarId], references: [id])
+    constructionSku   constructionSku[]
+    warranty          warranty?
+    constructionImage constructionImage[]
+    settlement_order  settlement_order?
+}
+
+model constructionImage {
+    id             Int          @id @default(autoincrement())
+    createdAt      Int?
+    updatedAt      Int?
+    deletedAt      Int?
+    status         Int?
+    carId          Int
+    src            Json
+    constructionId Int
+    productId      Int
+    car            car          @relation(fields: [carId], references: [id])
+    product        product      @relation(fields: [productId], references: [id])
+    construction   construction @relation(fields: [constructionId], references: [id])
+}
+
+model constructionSku {
+    id             Int          @id @default(autoincrement())
+    createdAt      Int?
+    updatedAt      Int?
+    status         Int?
+    employeeId     Int
+    constructionId Int
+    productSkuId   Int
+    rollId         Int
+    length         Int
+    roll           roll?        @relation(fields: [rollId], references: [id])
+    employee       employee?    @relation(fields: [employeeId], references: [id])
+    construction   construction @relation(fields: [constructionId], references: [id])
+    productSku     productSku?  @relation(fields: [productSkuId], references: [id])
+}
+
+model roll {
+    id              Int               @id @default(autoincrement())
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    official        Int?
+    length          Int
+    rollNumber      String
+    productId       Int
+    product         product           @relation(fields: [productId], references: [id])
+    constructionSku constructionSku[]
+}
+
+model image {
+    id        Int    @id @default(autoincrement())
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+    url       String
+    type      Int
+}
+
+model employee {
+    id              Int               @id @default(autoincrement())
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    image           String?
+    name            String
+    phoneNumber     String
+    username        String            @unique
+    password        String
+    position        Int
+    storeId         Int
+    star            Int
+    nickname        String
+    level           Int
+    employeementAt  Int
+    serviceNumber   Int
+    store           store             @relation(fields: [storeId], references: [id])
+    constructionSku constructionSku[]
+    userCoupon      userCoupon[]
+    userProductPack userProductPack[]
+}
+
+model welfare {
+    id        Int    @id @default(autoincrement())
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+    image     String
+    name      String
+    describe  String
+    level     Int
+}
+
+model order {
+    id           Int          @id @default(autoincrement())
+    createdAt    Int?
+    updatedAt    Int?
+    status       Int?
+    orderNumber  String       @unique()
+    deleteReason String
+    userId       Int
+    deadline     Int
+    deleteAt     Int
+    completeAt   Int
+    origin       Int
+    amount       Int
+    payStage     Int
+    isPoint      Int
+    otherFees    Int
+    memo         String?
+    user         user         @relation(fields: [userId], references: [id])
+    orderSku     orderSku[]
+    pointRecord  pointRecord? @relation(fields: [id], references: [orderId])
+    userCoupon   userCoupon[]
+    payment      payment[]
+}
+
+model orderSku {
+    id             Int        @id @default(autoincrement())
+    createdAt      Int?
+    updatedAt      Int?
+    status         Int?
+    orderId        Int
+    orderSkuNumber String     @unique()
+    productSkuId   Int
+    amount         Int
+    productCount   Int
+    completeAt     Int
+    storeId        Int
+    //discountAmount Int
+    useStatus      Int
+    usedAt         Int
+    store          store?     @relation(fields: [storeId], references: [id])
+    order          order      @relation(fields: [orderId], references: [id])
+    productSku     productSku @relation(fields: [productSkuId], references: [id])
+}
+
+model payment {
+    id            Int   @id @default(autoincrement())
+    createdAt     Int?
+    updatedAt     Int?
+    status        Int?
+    billType      Int
+    amount        Int
+    paymentMethod Int
+    payStatus     Int
+    paymentAt     Int
+    orderId       Int
+    order         order @relation(fields: [orderId], references: [id])
+}
+
+model configModel {
+    id        Int     @id @default(autoincrement())
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+    model     String?
+    parentId  Int?
+    tag       String?
+    title     String
+    resource  String
+    type      Int
+}
+
+model productSku {
+    id              Int               @id @default(autoincrement())
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    name            String
+    price           Int
+    productId       Int
+    pointStatus     Int
+    stock           Int
+    point           Int
+    product         product           @relation(fields: [productId], references: [id])
+    orderSku        orderSku[]
+    constructionSku constructionSku[]
+    userCoupon      userCoupon[]
+    couponTemplate  couponTemplate[]
+}
+
+model warranty {
+    id             Int          @id @default(autoincrement())
+    createdAt      Int?
+    updatedAt      Int?
+    status         Int?
+    constructionId Int          @unique
+    deadline       Int
+    code           String
+    construction   construction @relation(fields: [constructionId], references: [id])
+}
+
+model point {
+    id        Int  @id @default(autoincrement())
+    userId    Int  @unique
+    quantity  Int
+    user      user @relation(fields: [userId], references: [id])
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+}
+
+model pointRecord {
+    id        Int    @id @default(autoincrement())
+    userId    Int
+    action    Int
+    orderId   Int    @unique
+    sum       Int
+    quantity  Int
+    memo      String
+    user      user   @relation(fields: [userId], references: [id])
+    order     order?
+    createdAt Int?
+    updatedAt Int?
+    status    Int?
+}
+
+model productPack {
+    id              Int               @id @default(autoincrement())
+    price           Int
+    name            String
+    products        Json
+    type            Int
+    saleStatus      Int
+    pictrue         String
+    memo            String
+    deadlineDay     Int
+    applyStore      Json
+    createdAt       Int?
+    updatedAt       Int?
+    status          Int?
+    userProductPack userProductPack[]
+}
+
+model userCoupon {
+    id                Int              @id @default(autoincrement())
+    userId            Int
+    deadline          Int
+    code              String           @unique()
+    memo              String
+    orderNumber       String
+    createdAt         Int?
+    updatedAt         Int?
+    status            Int?
+    storeId           Int
+    usedAt            Int
+    recommenderId     Int?
+    applyStore        Json
+    employeeId        Int?
+    productId         Int
+    productSkuId      Int
+    userProductPackId Int
+    source            Int
+    couponTemplateId  Int
+    couponTemplate    couponTemplate?  @relation(fields: [couponTemplateId], references: [id])
+    order             order?           @relation(fields: [orderNumber], references: [orderNumber])
+    userProductPack   userProductPack? @relation(fields: [userProductPackId], references: [id])
+    product           product          @relation(fields: [productId], references: [id])
+    productSku        productSku       @relation(fields: [productSkuId], references: [id])
+    employee          employee?        @relation(fields: [employeeId], references: [id])
+    store             store?           @relation(fields: [storeId], references: [id])
+    user              user             @relation(fields: [userId], references: [id])
+}
+
+model userProductPack {
+    id            Int          @id @default(autoincrement())
+    createdAt     Int?
+    updatedAt     Int?
+    status        Int?
+    userId        Int
+    deadline      Int
+    code          String       @unique()
+    memo          String
+    storeId       Int
+    applyStore    Json
+    employeeId    Int?
+    products      Json
+    productPackId Int
+    productPack   productPack  @relation(fields: [productPackId], references: [id])
+    employee      employee?    @relation(fields: [employeeId], references: [id])
+    store         store?       @relation(fields: [storeId], references: [id])
+    user          user         @relation(fields: [userId], references: [id])
+    userCoupon    userCoupon[]
+}
+
+model settlement_order {
+    id             Int          @id @default(autoincrement())
+    createdAt      Int?
+    updatedAt      Int?
+    deletedAt      Int
+    constructionId Int          @unique()
+    price          Int
+    otherPrice     Int
+    paymentMethod  Int
+    construction   construction @relation(fields: [constructionId], references: [id])
+}
